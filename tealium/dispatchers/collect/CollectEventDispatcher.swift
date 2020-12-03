@@ -35,7 +35,11 @@ class CollectEventDispatcher: CollectProtocol {
         if CollectEventDispatcher.isValidUrl(url: dispatchURL) {
             // if using a custom endpoint, we recommend disabling batching, otherwise custom endpoint must handle batched events using Tealium's proprietary format
             // if using a CNAMEd domain, batching will work as normal.
-            if let baseURL = CollectEventDispatcher.getDomainFromURLString(url: dispatchURL) {
+            if !(CollectEventDispatcher.getPathFromURLString(url: dispatchURL)?.isEmpty ?? true) {
+                self.bulkEventDispatchURL = dispatchURL
+                self.singleEventDispatchURL = dispatchURL
+            }
+            else if let baseURL = CollectEventDispatcher.getDomainFromURLString(url: dispatchURL) {
                 self.bulkEventDispatchURL = "https://\(baseURL)\(CollectEventDispatcher.bulkEventPath)"
                 self.singleEventDispatchURL = "https://\(baseURL)\(CollectEventDispatcher.singleEventPath)"
             } else {
@@ -74,6 +78,22 @@ class CollectEventDispatcher: CollectProtocol {
         }
 
         return url.host
+    }
+    
+    /// Gets the path from a url￼.
+    ///
+    /// - Parameter url: `String` representation of a URL
+    /// - Returns: `String?` containing the path
+    static func getPathFromURLString(url: String) -> String? {
+        guard let url = URL(string: url) else {
+            return nil
+        }
+
+        let path = url.path
+        if path == "/" {
+            return ""
+        }
+        return path
     }
 
     /// URL initializer does not actually validate web addresses successfully (it's too permissive), so this additional check is required￼.
