@@ -40,7 +40,12 @@ public class CollectModule: Dispatcher {
     func updateCollectDispatcher(config: TealiumConfig,
                                  completion: ModuleCompletion?) {
         let urlString = config.options[CollectKey.overrideCollectUrl] as? String ?? CollectEventDispatcher.defaultDispatchBaseURL
-        collect = CollectEventDispatcher(dispatchURL: urlString, completion: completion)
+        if let urlSession = config.customURLSession {
+            collect = CollectEventDispatcher(dispatchURL: urlString, urlSession: urlSession, completion: completion)
+        }
+        else {
+            collect = CollectEventDispatcher(dispatchURL: urlString, completion: completion)
+        }
     }
 
     /// Detects track type and dispatches appropriately, adding mandatory data (account and profile) to the track if missing.￼

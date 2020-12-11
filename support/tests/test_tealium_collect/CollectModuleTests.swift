@@ -229,6 +229,32 @@ class CollectModuleTests: XCTestCase {
         XCTAssertTrue(config.options[CollectKey.overrideCollectProfile] as! String == "hello")
     }
 
+    var tealium: Tealium?
+    
+    func testCustomURLSession() {
+        
+        let expect = expectation(description: "config does not fail")
+        
+        let customURLSession:URLSessionProtocol = MockURLSessionNon200()
+        let config = testTealiumConfig.copy
+        config.customURLSession = customURLSession
+        config.batchingEnabled = false
+        config.batchSize = 1
+        config.dispatchers = [Dispatchers.Collect]
+        config.collectors = [Collectors.AppData, Collectors.Device]
+        
+        tealium = Tealium(config: config) { result in
+            if case .failure(let error) = result {
+                print("Tealium init failure: \(error.localizedDescription)")
+                XCTAssertNil(error)
+            }
+            expect.fulfill()
+        }
+        wait(for: [expect], timeout: 1.0)
+        
+        let tealiumEvent = TealiumEvent("test_track")
+        tealium?.track(tealiumEvent)
+    }
 }
 
 extension CollectModuleTests: ModuleDelegate {

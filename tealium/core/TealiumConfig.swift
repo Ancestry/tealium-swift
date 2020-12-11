@@ -15,6 +15,7 @@ open class TealiumConfig {
     public let environment: String
     public let dataSource: String?
     public lazy var options = [String: Any]()
+    public var customURLSession: URLSessionProtocol?
 
     /// Intended for internal use only. Provides access to the internal Tealium logger instance.
     public var logger: TealiumLoggerProtocol? {
